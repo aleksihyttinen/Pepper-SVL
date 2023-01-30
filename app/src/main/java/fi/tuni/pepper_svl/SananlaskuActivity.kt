@@ -1,10 +1,14 @@
 package fi.tuni.pepper_svl
 
+import android.app.Activity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
@@ -17,24 +21,54 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         "Joka kuuseen kurkottaa, se katajaan kapsahtaa",
         "Ei lämmin luita riko")
     var oikeaVastaus = ""
+    var count = 0
+    var rightAnswerCount = 0
     private lateinit var sanaView: TextView
     private lateinit var input: EditText
-    private lateinit var checkAnswer: Button
+    private lateinit var checkAnswerBtn: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sananlasku)
         QiSDK.register(this, this)
         sanaView = findViewById(R.id.sana)
         input = findViewById(R.id.input)
-        checkAnswer = findViewById(R.id.check_answer)
+        input.setOnEditorActionListener { view, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                Log.i("test", "toimii")
+                checkAnswer(input.text.toString())
+            }
+            return@setOnEditorActionListener false
+        }
+        input.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) { hideKeyboard(v) }
+        }
+        checkAnswerBtn = findViewById(R.id.check_answer)
+        checkAnswerBtn.isEnabled = true
+        startGame()
+        checkAnswerBtn.setOnClickListener {
+            if(input.text.isNotEmpty()) {
+                checkAnswer(input.text.toString())
+            }
+        }
     }
 
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager: InputMethodManager? = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager?
+        inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
+    }
     override fun onRobotFocusGained(qiContext: QiContext?) {
         val say: Say = SayBuilder.with(qiContext)
             .withText("Täällä voit pelata kanssani sananlaskupeliä. Aloitetaanko uusi peli?")
             .build()
         say.run()
-        startGame()
+        if(count <= 10) {
+            startGame()
+        }
+        checkAnswerBtn.setOnClickListener {
+            if(input.text.isNotEmpty()) {
+                checkAnswer(input.text.toString())
+            }
+        }
     }
 
     override fun onRobotFocusLost() {
@@ -50,6 +84,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         super.onDestroy()
     }
     fun startGame() {
+        input.setText("")
         val lause = sananlaskut.random()
         val sanat = lause.split(" ").toTypedArray()
         val rng = (sanat.indices).random()
@@ -61,8 +96,24 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             sanaView.text = sanat.joinToString(separator = " ")
         }
     }
-    fun checkAnswer() {
-        //todo
+    private fun checkAnswer(text: String) {
+        if (text.lowercase().trim() == oikeaVastaus.lowercase().trim()) {
+            //val say = SayBuilder.with(qiContext)
+                //.withText("Jee oikein meni!!")
+                //.build()
+            //say.run()
+            Log.i("vastaus", "oikein")
+            startGame()
+            rightAnswerCount++
+        } else {
+            //val say = SayBuilder.with(qiContext)
+                //.withText("Tämä meni väärin, oikea vastaus oli: $oikeaVastaus")
+                //.build()
+            //say.run()
+            Log.i("vastaus", "väärin")
+            startGame()
+        }
+        count++
     }
 
 }
