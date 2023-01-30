@@ -1,10 +1,31 @@
 topic: ~labra_topic()
-# Defining extra concepts out of words or group of words
-#concept:(hello) [hello hi hey "good morning" greetings]
 
-# Replying to speech
-#u:(~hello) ~hello
+#avainsanat/kysymykset
+concept:(kysymys) ["Mikä on" "Kerro minulle"]
+concept:(evondos) [evondosista evondos "lääke *"]
+concept:(somnox) [somnoxista somnox "*tyyny*" tyynystä]
+concept:(ohmni) [ohmnista "ohmni*"]
+concept:(mpower) [mpowerista mpower älyhousuista "*älyhousu*"]
+concept:(kelosound) [kelosound kelosoundista]
+concept:(vr) [vrstä "vr laseista" oculus oculuksesta "*vr*"]
+concept:(exoskeleton) [meditas meditaksesta exoskeletonista exoskeleton skelex]
+concept:(taikaseinä) [taikaiseinä taikaseinästä]
+concept:(säkkituoli) [säkkituoli säkkituolista]
+concept:(igloo) ["tämä huone" "*huone*" huoneesta igloo igloosta]
 
+#liike
 u: (seuraa minua) seuraan
-
-u: (Kerro minulle *) Tämä on ...
+u: (pysähdy) pysähdyn
+#laitteet
+u: (~kysymys ~yeti) "Tämä on Yeti-jättitabletti, joka on maailman ensimmäinen jättikokoinen Android-tabletti. Yeti-jättitabletti tuo koko digitaalisen maailman erilaisten käyttäjäryhmien ulottuville,
+                                                                    ja tabletin monipuolisuus ja iso koko mahdollistavat sen monipuolisen käytön erilaisissa ympäristöissä."
+u: (~kysymys ~evondos) "Evondos lääkeannostelurobotti, joka ohjaa kotihoidon asiakkaan ottamaan aina oikean lääkkeen oikeana annoksena ja oikeaan aikaan.  Palvelu käyttää apteekin tarjoamaa koneellista annosjakelua. Robotti lukee annospussin tekstikentistä lääkkeen antamisajankohdan ja toimii sen mukaisesti."
+u: (~kysymys ~somnox) "Somnox tyyny ohjaa käyttäjän hengittämään rauhallisesti ja tasaisessa rytmissä, joka auttaa käyttäjää nukahtamaan. Halaa tyynyä ja seuraa sen ohjaamaa hengitysrytmiä."
+u: (~kysymys ~ohmni) "Ohmni teleläsnäolorobotin avulla voit puhua videopuhelua liikkuessasi. Robotti seuraa sinua ja säätää videokameran kuvakulmaa liikkeesi mukaan, jotta pysyt aina näkyvillä."
+u: (~kysymys ~mpower) "MPower älyhousut mittaavat käyttäjän EMG -signaaleja eli hermojen ja lihasten sähköisiä signaaleja, jotka ohjaavat lihasten supistumista. sEMG eli pinta-EMG signaali sisältää hyödyllistä tietoa muunmuassa lihasten aktivaatiotasosta, väsymisestä ajoituksesta ja lihaksen erityyppisten solujen aktivaatiotasosta"
+u: (~kysymys ~kelosound) "Kelosoundin tarkoitus on tuoda luonto lähemmäs ihmistä ja rentouttaa toistamalla erilaisia äänimaailmoja luonnosta. Äänet toistetaan kelopuun sisältä, joka resonoi eri tavalla kuin normaali kaiutin. Voit myös koittaa laittaa korvasi puuta vasten, jolloin ääni kuuluu vielä paremmin."
+u: (~kysymys ~vr) "Oculus quest 2 VR lasien avulla voit treenata, pelata tai vaikka katsoa lempi elokuviasi immersiivisesti."
+u: (~kysymys ~exoskeleton) "Skelex exoskeleton tukee käyttäjän käsiä ja auttaa jaksamaan pidempään. Skelex on passiivinen exoskeleton eli se toimii jousien avulla. Laite keventää 0-4kg per käsi, joka mahdollistaa jopa kaksinkertaisen jaksamisen fyysisessä työssä."
+u: (~kysymys ~taikaseinä) "Magic Mirror -Taikaseinä auttaa kehittämään vuorovaikutus- ja kommunikaatiotaitoja luovan ja moniaistisen pelaamisen keinoin. Peli toimii esimerkiksi katseen, puheen, kosketuksen ja ohjaimien avulla ja samaan aikaan voi pelata yhdestä kuuteen henkilöä"
+u: (~kysymys ~säkkituoli) "Haltijan vibroakustinen säkkituoli on osa SHX aistihuoneita. Säkkituoli tärisee huoneen äänen mukaan, jolla on rauhoittava vaikutus."
+u: (~kysymys ~igloo) "Igloon immersiivinen huone on kuin VR lasit huoneeksi muutettuna. Toisin kuin laseilla, kokemukseen pääsee mukaan useampi käyttäjä."
