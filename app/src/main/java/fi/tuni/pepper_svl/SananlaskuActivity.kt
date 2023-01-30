@@ -1,6 +1,9 @@
 package fi.tuni.pepper_svl
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,12 +19,13 @@ import com.aldebaran.qi.sdk.`object`.conversation.Say
 import com.aldebaran.qi.sdk.builder.SayBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
 
+
 class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     var sananlaskut = arrayOf("Parempi katsoa kuin katua",
         "Joka kuuseen kurkottaa, se katajaan kapsahtaa",
         "Ei lämmin luita riko")
-    var oikeaVastaus = ""
-    var count = 0
+    var rightAnswer = ""
+    var count = 1
     var rightAnswerCount = 0
     private lateinit var sanaView: TextView
     private lateinit var input: EditText
@@ -61,9 +65,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             .withText("Täällä voit pelata kanssani sananlaskupeliä. Aloitetaanko uusi peli?")
             .build()
         say.run()
-        if(count <= 10) {
-            startGame()
-        }
+        startGame()
         checkAnswerBtn.setOnClickListener {
             if(input.text.isNotEmpty()) {
                 checkAnswer(input.text.toString())
@@ -83,37 +85,62 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         QiSDK.unregister(this, this)
         super.onDestroy()
     }
-    fun startGame() {
-        input.setText("")
-        val lause = sananlaskut.random()
-        val sanat = lause.split(" ").toTypedArray()
-        val rng = (sanat.indices).random()
-        var sana = sanat[rng]
-        oikeaVastaus = sana
-        sana = sana.replace("[a-zA-ZäöåÄÖÅ]".toRegex(), "_")
-        sanat[rng] = sana
-        runOnUiThread {
-            sanaView.text = sanat.joinToString(separator = " ")
+    private fun startGame() {
+        Log.i("test", "$count")
+        if(count < 10) {
+            input.setText("")
+            val lause = sananlaskut.random()
+            val sanat = lause.split(" ").toTypedArray()
+            val rng = (sanat.indices).random()
+            var sana = sanat[rng]
+            rightAnswer = sana
+            sana = sana.replace("[a-zA-ZäöåÄÖÅ]".toRegex(), "_")
+            sanat[rng] = sana
+            runOnUiThread {
+                sanaView.text = sanat.joinToString(separator = " ")
+            }
+        } else {
+            endGame()
         }
     }
+    private fun endGame() {
+        val alertDialog = AlertDialog.Builder(this)
+        alertDialog.setTitle("Peli loppui")
+        alertDialog.setMessage("Sait $rightAnswerCount/10 oikein!\nHaluatko pelata uudelleen?")
+        alertDialog.setCancelable(false)
+        alertDialog.setPositiveButton("Uusi peli") { dialog, whichButton ->
+            count = 1
+            rightAnswerCount = 0
+            startGame()
+        }
+
+        alertDialog.setNegativeButton("Palaa valikkoon",
+        ) { dialog, whichButton ->
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        alertDialog.show()
+    }
     private fun checkAnswer(text: String) {
-        if (text.lowercase().trim() == oikeaVastaus.lowercase().trim()) {
+        if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
             //val say = SayBuilder.with(qiContext)
                 //.withText("Jee oikein meni!!")
                 //.build()
             //say.run()
-            Log.i("vastaus", "oikein")
-            startGame()
+            Log.i("test", "oikein")
             rightAnswerCount++
+            count++
+            startGame()
         } else {
             //val say = SayBuilder.with(qiContext)
                 //.withText("Tämä meni väärin, oikea vastaus oli: $oikeaVastaus")
                 //.build()
             //say.run()
-            Log.i("vastaus", "väärin")
+            Log.i("test", "väärin")
+            count++
             startGame()
         }
-        count++
     }
 
 }

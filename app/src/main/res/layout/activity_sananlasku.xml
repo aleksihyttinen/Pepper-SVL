@@ -4,24 +4,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:clickable="true"
-    android:focusableInTouchMode="true" >
+    android:focusableInTouchMode="true"
+    android:gravity="center">
     <TextView
         android:id="@+id/sana"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="50sp"
-        android:text="Tänne tulee sananlasku-peli "/>
+        android:text="Tänne tulee sananlasku-peli"
+        android:textColor="@color/black"/>
     <EditText
+        android:layout_marginTop="40dp"
         android:id="@+id/input"
         android:layout_width="500dp"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:inputType="text"
-        android:imeOptions="actionDone"/>
-    <Button
+        android:imeOptions="actionDone"
+        android:hint="Kirjoita vastauksesi tähän"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_marginTop="20dp"
         android:id="@+id/check_answer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tarkista vastaus"
-        android:enabled="false"/>
+        android:text="Tarkista vastaus" />
 </LinearLayout>

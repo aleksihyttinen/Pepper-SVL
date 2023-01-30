@@ -11,19 +11,19 @@
         android:gravity="center"
         >
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/labra_button"
             android:layout_marginTop="30dp"
             android:layout_width="400dp"
             android:layout_height="80dp"
             android:text="Labran esittely"
-            android:textSize="30sp"/>
-        <Button
+            android:textSize="30sp" />
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/sananlasku_button"
             android:layout_marginTop="30dp"
             android:layout_width="400dp"
             android:layout_height="80dp"
             android:text="Sananlasku-peli"
-            android:textSize="30sp"/>
+            android:textSize="30sp" />
     </LinearLayout>
 </LinearLayout>
