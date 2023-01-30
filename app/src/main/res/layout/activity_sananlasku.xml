@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
     <TextView
+        android:id="@+id/sana"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="100sp"
+        android:textSize="50sp"
         android:text="Tänne tulee sananlasku-peli "/>
-
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="500dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/check_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tarkista vastaus"
+        android:enabled="false"/>
 </LinearLayout>
