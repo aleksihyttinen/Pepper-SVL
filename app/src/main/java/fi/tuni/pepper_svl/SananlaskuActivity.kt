@@ -21,12 +21,63 @@ import com.aldebaran.qi.sdk.design.activity.RobotActivity
 
 
 class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
-    var sananlaskut = arrayOf("Parempi katsoa kuin katua",
+    private var sananlaskut = arrayOf(
+        "Parempi katsoa kuin katua",
         "Joka kuuseen kurkottaa, se katajaan kapsahtaa",
-        "Ei lämmin luita riko")
+        "Ei lämmin luita riko",
+        "Ei oppi ojaan kaada, eikä tieto tieltä työnnä",
+        "Ei omena kauas puusta putoa",
+        "Ei ole koiraa karvoihin katsominen",
+        "Ei Roomaakaan päivässä rakennettu",
+        "Eteenpäin, sanoi mummo lumessa",
+        "Hyvin suunniteltu on puoliksi tehty",
+        "Hyvä antaa vähästään, paha ei paljostaankaan",
+        "Hädässä ystävä tunnetaan",
+        "Jokainen on oman onnensa seppä",
+        "Kaksi kärpästä yhdellä iskulla",
+        "Kertaus on opintojen äiti",
+        "Kuin apteekin hyllyltä",
+        "Kyllä routa porsaan kotiin ajaa",
+        "Lapsen suusta kuulee totuuden",
+        "Loppui lyhyeen kuin kanan lento",
+        "Luulo ei ole tiedon väärti",
+        "Minkä nuorena oppii, sen vanhana taitaa",
+        "Mitä useampi kokki, sitä huonompi soppa",
+        "Niin metsä vastaa kuin sinne huudetaan",
+        "Ojasta allikkoon",
+        "On taottava silloin, kun rauta on kuuma",
+        "Paistaa se päivä risukasaankin",
+        "Ruoho on vihreämpää aidan toisella puolen",
+        "Suutarin lapsilla ei ole kenkiä",
+        "Tie miehen sydämeen käy vatsan kautta",
+        "Uusi lumi on vanhan surma",
+        "Vesi vanhin voitehista",
+        "Vierivä kivi ei sammaloidu",
+        "Älä laita kaikkia munia samaan koriin",
+        "Alku aina hankalaa, lopussa kiitos seisoo",
+        "Ei auta itku markkinoilla",
+        "Ei haukku haavaa tee",
+        "Hätä ei lue lakia",
+        "Ilta on aamua viisaampi",
+        "Joka toiselle kuoppaa kaivaa, se itse siihen lankeaa",
+        "Kateus vie kalatkin vedestä",
+        "Kolmas kerta toden sanoo",
+        "Kyllä sokeakin kana joskus jyvän löytää",
+        "Nauru pidentää ikää",
+        "Oma maa mansikka, muu maa mustikka",
+        "Parempi katsoa kuin katua",
+        "Parempi pyy pivossa kuin kymmenen oksalla",
+        "Pilkka sattuu omaan nilkkaan",
+        "Puhtaus on puoli ruokaa",
+        "Se koira älähtää, johon kalikka kalahtaa",
+        "Se parhaiten nauraa, joka viimeksi nauraa",
+        "Sopu sijaa antaa",
+        "Vahinko ei tule kello kaulassa"
+        )
     var rightAnswer = ""
     var count = 1
     var rightAnswerCount = 0
+    var usedPhrases = mutableListOf<Int>()
     private lateinit var sanaView: TextView
     private lateinit var input: EditText
     private lateinit var checkAnswerBtn: Button
@@ -85,17 +136,25 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         QiSDK.unregister(this, this)
         super.onDestroy()
     }
+    fun rng() : Int {
+        var number = sananlaskut.indices.random()
+        while (usedPhrases.contains(number)) {
+            number = sananlaskut.indices.random()
+        }
+        usedPhrases.add(number)
+        return number
+    }
     private fun startGame() {
         Log.i("test", "$count")
         if(count < 10) {
             input.setText("")
             val lause = sananlaskut.random()
             val sanat = lause.split(" ").toTypedArray()
-            val rng = (sanat.indices).random()
-            var sana = sanat[rng]
+            var index = rng()
+            var sana = sanat[index]
             rightAnswer = sana
             sana = sana.replace("[a-zA-ZäöåÄÖÅ]".toRegex(), "_")
-            sanat[rng] = sana
+            sanat[index] = sana
             runOnUiThread {
                 sanaView.text = sanat.joinToString(separator = " ")
             }
