@@ -9,6 +9,8 @@ import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
 import com.aldebaran.qi.sdk.`object`.conversation.Chat
 import com.aldebaran.qi.sdk.`object`.conversation.QiChatbot
 import com.aldebaran.qi.sdk.`object`.conversation.Topic
+import com.aldebaran.qi.sdk.`object`.human.Human
+import com.aldebaran.qi.sdk.`object`.humanawareness.HumanAwareness
 import com.aldebaran.qi.sdk.`object`.locale.Language
 import com.aldebaran.qi.sdk.`object`.locale.Locale
 import com.aldebaran.qi.sdk.`object`.locale.Region
@@ -16,6 +18,7 @@ import com.aldebaran.qi.sdk.builder.ChatBuilder
 import com.aldebaran.qi.sdk.builder.QiChatbotBuilder
 import com.aldebaran.qi.sdk.builder.TopicBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import com.softbankrobotics.dx.followme.FollowHuman
 
 class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     private lateinit var chat: Chat
@@ -25,11 +28,13 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         QiSDK.register(this, this)
     }
 
-    override fun onRobotFocusGained(qiContext: QiContext?) {
+    override fun onRobotFocusGained(qiContext: QiContext) {
         val topic: Topic = TopicBuilder.with(qiContext)
             .withResource(R.raw.labra_topic)
             .build()
-
+        val humanAwareness: HumanAwareness = qiContext.humanAwareness
+        val engagedHuman: Human = humanAwareness.engagedHuman
+        val followHuman = FollowHuman(qiContext, engagedHuman)
         val qiChatbot: QiChatbot = QiChatbotBuilder.with(qiContext)
             .withTopic(topic)
             .build()
@@ -37,7 +42,15 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         chat = ChatBuilder.with(qiContext).withChatbot(qiChatbot).withLocale(locale).build();
         chat.addOnStartedListener { Log.i("chat", "chat started")}
         val chatFuture : Future<Void?> = chat.async().run();
-        chat.addOnHeardListener {heardPhrase -> Log.i("chat", heardPhrase.text)}
+        chat.addOnHeardListener {heardPhrase ->
+            Log.i("chat", heardPhrase.text)
+            if(heardPhrase.text == "Seuraa minua" && engagedHuman != null) {
+                followHuman.start()
+            }
+            if(heardPhrase.text == "Lopeta seuraaminen" && engagedHuman != null) {
+                followHuman.stop()
+            }
+        }
         qiChatbot.addOnEndedListener { endPhrase: String ->
             Log.i("chat", "chat ended = $endPhrase")
             chatFuture.requestCancellation()
