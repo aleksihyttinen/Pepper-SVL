@@ -33,10 +33,10 @@ class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
 
     override fun onRobotFocusGained(qiContext: QiContext?) {
-        val say: Say = SayBuilder.with(qiContext)
+        /*val say: Say = SayBuilder.with(qiContext)
             .withText("Hei ihminen!")
             .build()
-        say.run()
+        say.run()*/
     }
 
     override fun onRobotFocusLost() {
