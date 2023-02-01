@@ -12,13 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PepperSVL">
         <activity
-            android:name=".LabraActivity"
+            android:name=".activities.LabraActivity"
             android:exported="false" />
         <activity
-            android:name=".SananlaskuActivity"
+            android:name=".activities.SananlaskuActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

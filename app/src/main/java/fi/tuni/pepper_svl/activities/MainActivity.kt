@@ -1,4 +1,4 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,6 +12,7 @@ import com.aldebaran.qi.sdk.builder.AnimateBuilder
 import com.aldebaran.qi.sdk.builder.AnimationBuilder
 import com.aldebaran.qi.sdk.builder.SayBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import fi.tuni.pepper_svl.R
 
 class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
     private var playAnimation = false

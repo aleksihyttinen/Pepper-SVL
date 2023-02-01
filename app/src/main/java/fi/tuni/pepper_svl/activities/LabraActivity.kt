@@ -1,10 +1,12 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.aldebaran.qi.Future
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
@@ -22,6 +24,9 @@ import com.aldebaran.qi.sdk.builder.QiChatbotBuilder
 import com.aldebaran.qi.sdk.builder.TopicBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
 import com.softbankrobotics.dx.followme.FollowHuman
+import fi.tuni.pepper_svl.adapters.CustomAdapter
+import fi.tuni.pepper_svl.models.ItemsViewModel
+import fi.tuni.pepper_svl.R
 
 class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     private lateinit var chat: Chat
@@ -34,6 +39,16 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         setContentView(R.layout.activity_labra)
         QiSDK.register(this, this)
         text = findViewById(R.id.text)
+        val recyclerview = findViewById<RecyclerView>(R.id.recyclerview)
+        recyclerview.layoutManager = GridLayoutManager(this, 6)
+        val deviceNames = arrayOf("Yeti", "Igloo",  "evondos", "somnox", "ohmni", "mpower", "kelosound",
+            "oculus", "exoskeleton", "taikaseinä", "säkkituoli")
+        val data = ArrayList<ItemsViewModel>()
+        for (device in deviceNames) {
+            data.add(ItemsViewModel(R.drawable.test, device))
+        }
+        val adapter = CustomAdapter(data)
+        recyclerview.adapter = adapter
     }
 
     @SuppressLint("ResourceAsColor")
@@ -78,7 +93,7 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
                 text.setTextColor(ContextCompat.getColor(this, R.color.green))
             } else {
                 text.text = "Seurattavaa ihmistä ei löydy"
-                text.setTextColor(ContextCompat.getColor(this, R.color.green))
+                text.setTextColor(ContextCompat.getColor(this, R.color.red))
             }
         }
     }

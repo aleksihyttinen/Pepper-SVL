@@ -1,4 +1,4 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.data
 
 
 class Sananlaskut {

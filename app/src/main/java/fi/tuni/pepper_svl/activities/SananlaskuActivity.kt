@@ -1,11 +1,10 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.activities
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.animation.Animation
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -17,6 +16,8 @@ import com.aldebaran.qi.sdk.`object`.conversation.ListenResult
 import com.aldebaran.qi.sdk.`object`.conversation.Say
 import com.aldebaran.qi.sdk.builder.*
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import fi.tuni.pepper_svl.R
+import fi.tuni.pepper_svl.data.Sananlaskut
 import kotlin.concurrent.thread
 
 
