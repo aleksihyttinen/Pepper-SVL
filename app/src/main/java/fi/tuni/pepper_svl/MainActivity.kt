@@ -2,16 +2,24 @@ package fi.tuni.pepper_svl
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
 import com.aldebaran.qi.sdk.`object`.conversation.Say
+import com.aldebaran.qi.sdk.builder.AnimateBuilder
+import com.aldebaran.qi.sdk.builder.AnimationBuilder
 import com.aldebaran.qi.sdk.builder.SayBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
 
 class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
+    private var playAnimation = false
     override fun onCreate(savedInstanceState: Bundle?) {
+        if(savedInstanceState == null) {
+            playAnimation = true
+        }
+        Log.i("test",savedInstanceState.toString())
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         QiSDK.register(this, this)
@@ -33,10 +41,15 @@ class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
 
     override fun onRobotFocusGained(qiContext: QiContext?) {
-        /*val say: Say = SayBuilder.with(qiContext)
-            .withText("Hei ihminen!")
-            .build()
-        say.run()*/
+        if(playAnimation) {
+            val say: Say = SayBuilder.with(qiContext)
+                .withText("Hei ihminen, minä olen Pepper")
+                .build()
+            say.async().run()
+            val animation = AnimationBuilder.with(qiContext).withResources(R.raw.wave).build()
+            val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+            animate.run()
+        }
     }
 
     override fun onRobotFocusLost() {

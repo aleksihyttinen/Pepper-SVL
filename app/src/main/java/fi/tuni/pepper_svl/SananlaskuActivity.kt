@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.animation.Animation
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -14,9 +15,7 @@ import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
 import com.aldebaran.qi.sdk.`object`.conversation.Listen
 import com.aldebaran.qi.sdk.`object`.conversation.ListenResult
 import com.aldebaran.qi.sdk.`object`.conversation.Say
-import com.aldebaran.qi.sdk.builder.ListenBuilder
-import com.aldebaran.qi.sdk.builder.PhraseSetBuilder
-import com.aldebaran.qi.sdk.builder.SayBuilder
+import com.aldebaran.qi.sdk.builder.*
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
 import kotlin.concurrent.thread
 
@@ -44,7 +43,10 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             .withText("Nyt voit pelata kanssani sananlaskupeliä. Voit sanoa minulle" +
                     "puuttuvan sanan tai painaa näytöllä näkyvistä vaihtoehdoista.")
             .build()
-        say.run()
+        say.async().run()
+        val animation = AnimationBuilder.with(qiContext).withResources(R.raw.show_tablet).build()
+        val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+        animate.run()
         startListen(qiContext)
         startGame()
         btnList.forEach {btn -> btn.setOnClickListener {
@@ -167,7 +169,8 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                 sananlaskut = Sananlaskut().getSananlaskut()
                 startGame()
             }
-            alertDialog.setNegativeButton("Palaa valikkoon",
+            alertDialog.setNegativeButton(
+                "Palaa valikkoon",
             ) { dialog, whichButton ->
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
@@ -185,7 +188,10 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                 val say = SayBuilder.with(qiContext)
                     .withText("Jee oikein meni!!")
                     .build()
-                say.run()
+                say.async().run()
+                val animation = AnimationBuilder.with(qiContext).withResources(R.raw.nice_reaction).build()
+                val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+                animate.run()
                 startListen(qiContext)
                 Log.i("test", "oikein")
                 rightAnswerCount++
@@ -198,7 +204,10 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                 val say = SayBuilder.with(qiContext)
                     .withText("Tämä meni väärin, oikea vastaus oli: $rightAnswer")
                     .build()
-                say.run()
+                say.async().run()
+                val animation = AnimationBuilder.with(qiContext).withResources(R.raw.sad_reaction).build()
+                val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+                animate.run()
                 startListen(qiContext)
                 Log.i("test", "väärin")
                 count++
