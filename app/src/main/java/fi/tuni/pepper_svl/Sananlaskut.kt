@@ -1,12 +1,9 @@
 package fi.tuni.pepper_svl
 
-import com.aldebaran.qi.sdk.QiContext
-import com.aldebaran.qi.sdk.`object`.conversation.PhraseSet
-import com.aldebaran.qi.sdk.builder.PhraseSetBuilder
 
 class Sananlaskut {
-    fun getPhrases(): Array<String> {
-        return arrayOf(
+    fun getSananlaskut(): MutableList<String> {
+        return mutableListOf(
             "Parempi katsoa kuin katua",
             "Joka kuuseen kurkottaa, se katajaan kapsahtaa",
             "Ei lämmin luita riko",
@@ -62,14 +59,30 @@ class Sananlaskut {
     }
 
 
-    private fun createPhraseSet(qiContext: QiContext?): PhraseSet {
-        val phrases = listOf(
-            "Alku", "Ei", "Eteenpäin", "Hyvin", "Hyvä", "Hädässä", "Hätä", "Ilta", "Joka", "Jokainen",
-            // the rest of the phrases...
-        )
-        return PhraseSetBuilder.with(qiContext)
-            .withTexts(*phrases.toTypedArray())
-            .build()
+    fun getWords(): Array<String> {
+        return arrayOf("Alku","Ei","Eteenpäin","Hyvin","Hyvä","Hädässä","Hätä","Ilta","Joka",
+            "Jokainen","Kaksi","Kateus","Kertaus","Kolmas","Kuin","Kyllä","Lapsen","Loppui",
+            "Luulo","Minkä","Mitä","Nauru","Niin","Ojasta","Oma","On","Paistaa","Parempi","Pilkka",
+            "Puhtaus","Ruoho","Se","Sopu","Suutarin","Tie","Uusi","Vahinko","Vesi","Vierivä","Älä",
+            "Roomaakaan","aamua","aidan","aina","ajaa","allikkoon","antaa","apteekin",
+            "auta","ei","eikä","haavaa","hankalaa","haukku","huonompi","huudetaan","hyllyltä",
+            "ikää","iskulla","itku","itse","johon","joka","joskus","jyvän","kaada","kaikkia",
+            "kaivaa","kalahtaa","kalatkin","kalikka","kana","kanan","kapsahtaa","karvoihin",
+            "katajaan","katsoa","katsominen","katua","kauas","kaulassa","kautta","kello","kenkiä"
+            ,"kerta","kiitos","kivi","koira","koiraa","kokki","koriin","kotiin","kuin","kun",
+            "kuoppaa","kurkottaa","kuulee","kuuma","kuuseen","kymmenen","kärpästä","käy","laita",
+            "lakia","lankeaa","lapsilla","lento","lopussa","lue","luita","lumessa","lumi","lyhyeen",
+            "lämmin","löytää","maa","mansikka","markkinoilla","metsä","miehen","mummo","munia",
+            "mustikka","muu","nauraa","nilkkaan","nuorena","ojaan","oksalla","ole","omaan",
+            "oman","omena","on","onnensa","opintojen","oppi","oppii","paha","paljostaankaan",
+            "parhaiten","pidentää","pivossa","porsaan","puolen","puoli","puoliksi","putoa","puusta",
+            "pyy","päivä","päivässä","rakennettu","rauta","riko","risukasaankin","routa","ruokaa",
+            "samaan","sammaloidu","sanoi","sanoo","sattuu","se","seisoo","sen","seppä","siihen",
+            "sijaa","silloin","sinne","sitä","sokeakin","soppa","surma","suunniteltu","suusta",
+            "sydämeen","taitaa","taottava","tee","tehty","tiedon","tieltä","tieto","toden",
+            "toisella","toiselle","totuuden","tule","tunnetaan","työnnä","useampi","vanhan",
+            "vanhana","vanhin","vastaa","vatsan","vedestä","vie","vihreämpää","viimeksi",
+            "viisaampi","voitehista","vähästään","väärti","yhdellä","ystävä","äiti","älähtää")
     }
 
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.aldebaran.qi.Future
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
@@ -25,67 +26,79 @@ import com.softbankrobotics.dx.followme.FollowHuman
 class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     private lateinit var chat: Chat
     private lateinit var text : TextView
-    private lateinit var qiContext: QiContext
-    var followHuman: FollowHuman? = null
+    private var qiContext: QiContext? = null
+    private var followHuman: FollowHuman? = null
+    private var humanAwareness: HumanAwareness? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_labra)
         QiSDK.register(this, this)
         text = findViewById(R.id.text)
     }
-    private fun startFollowing(qiContext: QiContext?) {
-        val engagedHuman: Human = qiContext!!.humanAwareness.engagedHuman
-        followHuman = FollowHuman(qiContext, engagedHuman)
-        Log.i("seuraa", "seuraan")
-        followHuman!!.start()
-    }
+
     @SuppressLint("ResourceAsColor")
     override fun onRobotFocusGained(_qiContext: QiContext) {
         qiContext = _qiContext
+        humanAwareness = qiContext?.humanAwareness
+        startChat()
+        updateUi(humanAwareness?.engagedHuman != null)
+        humanAwareness!!.addOnEngagedHumanChangedListener {
+            updateUi(humanAwareness?.engagedHuman != null)
+            stopFollowing()
+        }
+
+    }
+
+    override fun onRobotFocusLost() {
+        chat.removeAllOnStartedListeners()
+        chat.removeAllOnHeardListeners()
+        humanAwareness?.removeAllOnEngagedHumanChangedListeners()
+        qiContext = null
+    }
+
+    override fun onRobotFocusRefused(reason: String?) {
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        QiSDK.unregister(this, this)
+    }
+    private fun startFollowing() {
+        val engagedHuman: Human? = humanAwareness?.engagedHuman
+        followHuman = engagedHuman?.let { FollowHuman(qiContext!!, it) }
+        followHuman?.start()
+    }
+    private fun stopFollowing() {
+        followHuman?.stop()
+        followHuman = null
+    }
+    private fun updateUi(humanFound: Boolean) {
+        runOnUiThread {
+            if (humanFound) {
+                text.text = "Valmiina seuraamaan!"
+                text.setTextColor(ContextCompat.getColor(this, R.color.green))
+            } else {
+                text.text = "Seurattavaa ihmistä ei löydy"
+                text.setTextColor(ContextCompat.getColor(this, R.color.green))
+            }
+        }
+    }
+    private fun startChat() {
         val topic: Topic = TopicBuilder.with(qiContext)
             .withResource(R.raw.labra_topic)
             .build()
         val qiChatbot: QiChatbot = QiChatbotBuilder.with(qiContext)
             .withTopic(topic)
             .build()
-        val locale = Locale(Language.FINNISH, Region.FINLAND);
-        chat = ChatBuilder.with(qiContext).withChatbot(qiChatbot).withLocale(locale).build();
+        val locale = Locale(Language.FINNISH, Region.FINLAND)
+        chat = ChatBuilder.with(qiContext).withChatbot(qiChatbot).withLocale(locale).build()
         chat.addOnStartedListener { Log.i("chat", "chat started")}
-        val chatFuture : Future<Void?> = chat.async().run()
-        if(qiContext.humanAwareness.engagedHuman != null ) {
-            runOnUiThread {
-                text.text = "Seurattavaa ihmistä ei löydy"
-                text.setTextColor(R.color.red)
-            }
-        } else {
-            runOnUiThread {
-                text.text = "Valmiina seuraamaan!"
-                text.setTextColor(R.color.green)
-            }
-
-        }
-        qiContext.humanAwareness.addOnEngagedHumanChangedListener {
-            if(qiContext.humanAwareness.engagedHuman == null) {
-                runOnUiThread {
-                    text.text = "Seurattavaa ihmistä ei löydy"
-                    text.setTextColor(R.color.red)
-                }
-            } else {
-                runOnUiThread {
-                    text.text = "Valmiina seuraamaan!"
-                    text.setTextColor(R.color.green)
-                }
-            }
-        }
-        chat.addOnHeardListener {heardPhrase ->
-            Log.i("chat", heardPhrase.text)
+        val chatFuture = chat.async().run()
+        chat.addOnHeardListener { heardPhrase ->
             if(heardPhrase.text == "seuraa minua") {
-                startFollowing(qiContext)
+                startFollowing()
             }
             if(heardPhrase.text == "pysähdy") {
-                Log.i("seuraa", "lopeta")
-                followHuman!!.stop()
-                followHuman = null
+                stopFollowing()
             }
         }
         qiChatbot.addOnEndedListener { endPhrase: String ->
@@ -97,19 +110,5 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
                 Log.e("Error", "Discussion finished with error.", future.error)
             }
         }
-    }
-
-    override fun onRobotFocusLost() {
-        chat.removeAllOnStartedListeners()
-        chat.removeAllOnHeardListeners()
-        qiContext.humanAwareness.removeAllOnEngagedHumanChangedListeners()
-    }
-
-    override fun onRobotFocusRefused(reason: String?) {
-        TODO("Not yet implemented")
-    }
-    override fun onDestroy() {
-        QiSDK.unregister(this, this)
-        super.onDestroy()
     }
 }
