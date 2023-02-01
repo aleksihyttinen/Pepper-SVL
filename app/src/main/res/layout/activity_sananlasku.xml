@@ -13,19 +13,26 @@
         android:textSize="40sp"
         android:text="Tänne tulee sananlasku-peli"
         android:textColor="@color/black"/>
-    <EditText
-        android:layout_marginTop="40dp"
-        android:id="@+id/input"
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:inputType="text"
-        android:imeOptions="actionDone"
-        android:hint="Kirjoita vastauksesi tähän"/>
+
     <androidx.appcompat.widget.AppCompatButton
         android:layout_marginTop="20dp"
-        android:id="@+id/check_answer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tarkista vastaus" />
+        android:id="@+id/answer1"
+        android:layout_width="500dp"
+        android:layout_height="100dp"
+        android:textSize="50dp"
+        android:text="Vastaus1" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_marginTop="20dp"
+        android:id="@+id/answer2"
+        android:layout_width="500dp"
+        android:layout_height="100dp"
+        android:textSize="50dp"
+        android:text="Vastaus2" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_marginTop="20dp"
+        android:id="@+id/answer3"
+        android:layout_width="500dp"
+        android:layout_height="100dp"
+        android:textSize="50dp"
+        android:text="Vastaus3" />
 </LinearLayout>

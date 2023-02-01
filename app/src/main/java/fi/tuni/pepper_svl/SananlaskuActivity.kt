@@ -1,16 +1,14 @@
 package fi.tuni.pepper_svl
 
-import android.app.Activity
+import fi.tuni.pepper_svl.Sananlaskut
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
@@ -22,88 +20,33 @@ import com.aldebaran.qi.sdk.builder.ListenBuilder
 import com.aldebaran.qi.sdk.builder.PhraseSetBuilder
 import com.aldebaran.qi.sdk.builder.SayBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import java.util.*
+import java.util.logging.Handler
 import kotlin.concurrent.thread
+import kotlin.concurrent.timerTask
 
 
 class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
-    private var sananlaskut = arrayOf(
-        "Parempi katsoa kuin katua",
-        "Joka kuuseen kurkottaa, se katajaan kapsahtaa",
-        "Ei lämmin luita riko",
-        "Ei oppi ojaan kaada, eikä tieto tieltä työnnä",
-        "Ei omena kauas puusta putoa",
-        "Ei ole koiraa karvoihin katsominen",
-        "Ei Roomaakaan päivässä rakennettu",
-        "Eteenpäin, sanoi mummo lumessa",
-        "Hyvin suunniteltu on puoliksi tehty",
-        "Hyvä antaa vähästään, paha ei paljostaankaan",
-        "Hädässä ystävä tunnetaan",
-        "Jokainen on oman onnensa seppä",
-        "Kaksi kärpästä yhdellä iskulla",
-        "Kertaus on opintojen äiti",
-        "Kuin apteekin hyllyltä",
-        "Kyllä routa porsaan kotiin ajaa",
-        "Lapsen suusta kuulee totuuden",
-        "Loppui lyhyeen kuin kanan lento",
-        "Luulo ei ole tiedon väärti",
-        "Minkä nuorena oppii, sen vanhana taitaa",
-        "Mitä useampi kokki, sitä huonompi soppa",
-        "Niin metsä vastaa kuin sinne huudetaan",
-        "Ojasta allikkoon",
-        "On taottava silloin, kun rauta on kuuma",
-        "Paistaa se päivä risukasaankin",
-        "Ruoho on vihreämpää aidan toisella puolen",
-        "Suutarin lapsilla ei ole kenkiä",
-        "Tie miehen sydämeen käy vatsan kautta",
-        "Uusi lumi on vanhan surma",
-        "Vesi vanhin voitehista",
-        "Vierivä kivi ei sammaloidu",
-        "Älä laita kaikkia munia samaan koriin",
-        "Alku aina hankalaa, lopussa kiitos seisoo",
-        "Ei auta itku markkinoilla",
-        "Ei haukku haavaa tee",
-        "Hätä ei lue lakia",
-        "Ilta on aamua viisaampi",
-        "Joka toiselle kuoppaa kaivaa, se itse siihen lankeaa",
-        "Kateus vie kalatkin vedestä",
-        "Kolmas kerta toden sanoo",
-        "Kyllä sokeakin kana joskus jyvän löytää",
-        "Nauru pidentää ikää",
-        "Oma maa mansikka, muu maa mustikka",
-        "Parempi katsoa kuin katua",
-        "Parempi pyy pivossa kuin kymmenen oksalla",
-        "Pilkka sattuu omaan nilkkaan",
-        "Puhtaus on puoli ruokaa",
-        "Se koira älähtää, johon kalikka kalahtaa",
-        "Se parhaiten nauraa, joka viimeksi nauraa",
-        "Sopu sijaa antaa",
-        "Vahinko ei tule kello kaulassa"
-        )
+    private lateinit var phraseSet: PhraseSet
+    private var sananlaskut = Sananlaskut().getPhrases()
     var rightAnswer = ""
     var count = 1
     var rightAnswerCount = 0
     private lateinit var sanaView: TextView
-    private lateinit var input: EditText
-    private lateinit var checkAnswerBtn: Button
+    private var btnList = mutableListOf<Button>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sananlasku)
         QiSDK.register(this, this)
         sanaView = findViewById(R.id.sana)
-        input = findViewById(R.id.input)
-        input.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) { hideKeyboard(v) }
-        }
-        checkAnswerBtn = findViewById(R.id.check_answer)
-        checkAnswerBtn.isEnabled = true
+        btnList.add(findViewById(R.id.answer1))
+        btnList.add(findViewById(R.id.answer2))
+        btnList.add(findViewById(R.id.answer3))
+        startGame()
     }
 
-    private fun hideKeyboard(view: View) {
-        val inputMethodManager: InputMethodManager? = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager?
-        inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
-    }
     private fun startListen(qiContext: QiContext?) {
-        val phraseSet: PhraseSet = PhraseSetBuilder.with(qiContext)
+        phraseSet = PhraseSetBuilder.with(qiContext)
             .withTexts(    "Alku","Ei","Eteenpäin","Hyvin","Hyvä","Hädässä","Hätä","Ilta","Joka","Jokainen","Kaksi","Kateus","Kertaus","Kolmas","Kuin","Kyllä","Lapsen","Loppui","Luulo","Minkä","Mitä","Nauru","Niin","Ojasta","Oma","On","Paistaa","Parempi","Pilkka","Puhtaus","Ruoho","Se","Sopu","Suutarin","Tie","Uusi","Vahinko","Vesi","Vierivä","Älä","Roomaakaan","aamua","aidan","aina","ajaa","allikkoon","antaa","antaa","apteekin","auta","ei","eikä","haavaa","hankalaa","haukku","huonompi","huudetaan","hyllyltä","ikää","iskulla","itku","itse","johon","joka","joskus","jyvän","kaada","kaikkia","kaivaa","kalahtaa","kalatkin","kalikka","kana","kanan","kapsahtaa","karvoihin","katajaan","katsoa","katsominen","katua","kauas","kaulassa","kautta","kello","kenkiä","kerta","kiitos","kivi","koira","koiraa","kokki","koriin","kotiin","kuin","kun","kuoppaa","kurkottaa","kuulee","kuuma","kuuseen","kymmenen","kärpästä","käy","laita","lakia","lankeaa","lapsilla","lento","lopussa","lue","luita","lumessa","lumi","lyhyeen","lämmin","löytää","maa","mansikka","markkinoilla","metsä","miehen","mummo","munia","mustikka","muu","nauraa","nauraa","nilkkaan","nuorena","ojaan","oksalla","ole","omaan","oman","omena","on","onnensa","opintojen","oppi","oppii","paha","paljostaankaan","parhaiten","pidentää","pivossa","porsaan","puolen","puoli","puoliksi","putoa","puusta","pyy","päivä","päivässä","rakennettu","rauta","riko","risukasaankin","routa","ruokaa","samaan","sammaloidu","sanoi","sanoo","sattuu","se","seisoo","sen","seppä","siihen","sijaa","silloin","sinne","sitä","sokeakin","soppa","surma","suunniteltu","suusta","sydämeen","taitaa","taottava","tee","tehty","tiedon","tieltä","tieto","toden","toisella","toiselle","totuuden","tule","tunnetaan","työnnä","useampi","vanhan","vanhana","vanhin","vastaa","vatsan","vedestä","vie","vihreämpää","viimeksi","viisaampi","voitehista","vähästään","väärti","yhdellä","ystävä","äiti","älähtää"
         )
             .build()
@@ -122,18 +65,9 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             .build()
         say.run()
         startGame()
-        checkAnswerBtn.setOnClickListener {
-            if(input.text.isNotEmpty()) {
-                checkAnswer(input.text.toString(), qiContext)
-            }
-        }
-        input.setOnEditorActionListener { view, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                Log.i("test", "toimii")
-                checkAnswer(input.text.toString(), qiContext)
-            }
-            return@setOnEditorActionListener false
-        }
+        btnList.forEach {btn -> btn.setOnClickListener {
+            checkAnswer(btn.text.toString(), qiContext)
+        }}
         startListen(qiContext)
     }
 
@@ -149,11 +83,15 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         QiSDK.unregister(this, this)
         super.onDestroy()
     }
-
+    private fun getRandomWord() :String {
+        var phrases = mutableListOf<String>("Alku","Ei","Eteenpäin","Hyvin","Hyvä","Hädässä","Hätä","Ilta","Joka","Jokainen","Kaksi","Kateus","Kertaus","Kolmas","Kuin","Kyllä","Lapsen","Loppui","Luulo","Minkä","Mitä","Nauru","Niin","Ojasta","Oma","On","Paistaa","Parempi","Pilkka","Puhtaus","Ruoho","Se","Sopu","Suutarin","Tie","Uusi","Vahinko","Vesi","Vierivä","Älä","Roomaakaan","aamua","aidan","aina","ajaa","allikkoon","antaa","antaa","apteekin","auta","ei","eikä","haavaa","hankalaa","haukku","huonompi","huudetaan","hyllyltä","ikää","iskulla","itku","itse","johon","joka","joskus","jyvän","kaada","kaikkia","kaivaa","kalahtaa","kalatkin","kalikka","kana","kanan","kapsahtaa","karvoihin","katajaan","katsoa","katsominen","katua","kauas","kaulassa","kautta","kello","kenkiä","kerta","kiitos","kivi","koira","koiraa","kokki","koriin","kotiin","kuin","kun","kuoppaa","kurkottaa","kuulee","kuuma","kuuseen","kymmenen","kärpästä","käy","laita","lakia","lankeaa","lapsilla","lento","lopussa","lue","luita","lumessa","lumi","lyhyeen","lämmin","löytää","maa","mansikka","markkinoilla","metsä","miehen","mummo","munia","mustikka","muu","nauraa","nauraa","nilkkaan","nuorena","ojaan","oksalla","ole","omaan","oman","omena","on","onnensa","opintojen","oppi","oppii","paha","paljostaankaan","parhaiten","pidentää","pivossa","porsaan","puolen","puoli","puoliksi","putoa","puusta","pyy","päivä","päivässä","rakennettu","rauta","riko","risukasaankin","routa","ruokaa","samaan","sammaloidu","sanoi","sanoo","sattuu","se","seisoo","sen","seppä","siihen","sijaa","silloin","sinne","sitä","sokeakin","soppa","surma","suunniteltu","suusta","sydämeen","taitaa","taottava","tee","tehty","tiedon","tieltä","tieto","toden","toisella","toiselle","totuuden","tule","tunnetaan","työnnä","useampi","vanhan","vanhana","vanhin","vastaa","vatsan","vedestä","vie","vihreämpää","viimeksi","viisaampi","voitehista","vähästään","väärti","yhdellä","ystävä","äiti","älähtää")
+        phrases = phrases.filter { phrase -> !phrase.equals(rightAnswer) }.toMutableList()
+        return phrases.random().toString()
+    }
     private fun startGame() {
         Log.i("test", "$count")
-        if(count < 10) {
-            runOnUiThread {input.setText("")}
+        val order = (0..2).shuffled()
+        if(count <= 10) {
             val lause = sananlaskut.random()
             val sanat = lause.split(" ").toTypedArray()
             val index = sanat.indices.random()
@@ -163,10 +101,57 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             sanat[index] = sana
             runOnUiThread {
                 sanaView.text = sanat.joinToString(separator = " ")
+
+                order.forEach{ index ->
+                    if(index == order[1]) {
+                        Log.i("test", rightAnswer)
+                        btnList[index].text = rightAnswer
+                    } else {
+                        btnList[index].text = getRandomWord()
+                    }
+                }
+                btnList.forEach {btn -> btn.setOnClickListener {
+                    checkAnswerTest(btn.text.toString())
+                }
+                btn.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                }
             }
         } else {
             endGame()
         }
+    }
+    fun checkAnswerTest(text: String) {
+        @SuppressLint("ResourceAsColor")
+            if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
+                runOnUiThread {
+                    btnList.forEach { btn ->
+                        Log.i("test", btn.text.toString())
+                        Log.i("test", btn.text.equals(rightAnswer).toString())
+                        if(btn.text.equals(rightAnswer)) {
+                            btn.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
+                        } else {
+                            btn.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
+                        }
+                    }
+                }
+                thread {
+                    Log.i("test", "oikein")
+                    rightAnswerCount++
+                    count++
+
+                    Timer().schedule(timerTask {
+                        startGame()
+                    }, 2000)
+                }
+            } else {
+                thread {
+                    Log.i("test", "väärin")
+                    count++
+                    Timer().schedule(timerTask {
+                        startGame()
+                    }, 2000)
+                }
+            }
     }
     private fun endGame() {
         runOnUiThread{
@@ -188,8 +173,18 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
 
         alertDialog.show()}
     }
+    @SuppressLint("ResourceAsColor")
     private fun checkAnswer(text: String, qiContext: QiContext?) {
         if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
+            runOnUiThread {
+                btnList.forEach { btn ->
+                    if(btn.text.equals(rightAnswer)) {
+                        btn.setBackgroundColor(R.color.green)
+                    } else {
+                        btn.setBackgroundColor(R.color.red)
+                    }
+                }
+            }
             thread {
                 val say = SayBuilder.with(qiContext)
                     .withText("Jee oikein meni!!")
