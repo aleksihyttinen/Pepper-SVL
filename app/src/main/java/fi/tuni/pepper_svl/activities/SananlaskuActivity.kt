@@ -8,6 +8,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.aldebaran.qi.Future
+import com.aldebaran.qi.sdk.Qi
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
@@ -25,9 +27,11 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     private var sananlaskut = Sananlaskut().getSananlaskut()
     private var rightAnswer = ""
     private var count = 0
+    private var qiContext : QiContext? = null
     private var rightAnswerCount = 0
     private lateinit var wordView: TextView
     private var btnList = mutableListOf<Button>()
+    private var listenFuture: Future<ListenResult>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sananlasku)
@@ -36,23 +40,20 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         btnList.add(findViewById(R.id.answer1))
         btnList.add(findViewById(R.id.answer2))
         btnList.add(findViewById(R.id.answer3))
-        startGame()
     }
 
-    override fun onRobotFocusGained(qiContext: QiContext?) {
+    override fun onRobotFocusGained(_qiContext: QiContext?) {
+        qiContext = _qiContext
+        Log.i("test", "focus")
+        val animation = AnimationBuilder.with(qiContext).withResources(R.raw.show_tablet).build()
+        val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+        animate.async().run()
         val say: Say = SayBuilder.with(qiContext)
             .withText("Nyt voit pelata kanssani sananlaskupeliä. Voit sanoa minulle" +
                     "puuttuvan sanan tai painaa näytöllä näkyvistä vaihtoehdoista.")
             .build()
-        say.async().run()
-        val animation = AnimationBuilder.with(qiContext).withResources(R.raw.show_tablet).build()
-        val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
-        animate.run()
-        startListen(qiContext)
+        say.run()
         startGame()
-        btnList.forEach {btn -> btn.setOnClickListener {
-            checkAnswer(btn.text.toString(), qiContext)
-        }}
     }
 
     override fun onRobotFocusLost() {
@@ -65,15 +66,28 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         super.onDestroy()
     }
 
-    private fun startListen(qiContext: QiContext?) {
-        val phraseSet = PhraseSetBuilder.with(qiContext)
-            .withTexts(*Sananlaskut().getWords())
-            .build()
-        val listen: Listen = ListenBuilder.with(qiContext)
-            .withPhraseSet(phraseSet)
-            .build()
-        val listenResult : ListenResult = listen.run()
-        checkAnswer(listenResult.heardPhrase.text, qiContext)
+    private fun startListen() {
+        thread {
+            val phraseSet = PhraseSetBuilder.with(qiContext)
+                .withTexts(*Sananlaskut().getWords())
+                .build()
+            val listen: Listen = ListenBuilder.with(qiContext)
+                .withPhraseSet(phraseSet)
+                .build()
+            listenFuture = listen.async().run()
+            listenFuture?.thenConsume { future ->
+                if (future.isSuccess) {
+                    Log.i("test", listenFuture?.get()?.heardPhrase!!.text)
+                    checkAnswer(listenFuture?.get()?.heardPhrase!!.text)
+                } else if (future.hasError()) {
+                    Log.e("test", "Error", future.error)
+                }
+            }
+        }
+    }
+    private fun stopListen() {
+        listenFuture?.requestCancellation()
+        listenFuture = null
     }
 
     private fun getRandomWord() :String {
@@ -96,25 +110,35 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
 
     private fun startGame() {
+        Log.i("test", "peli alkaa")
         val buttonOrder = (0..2).shuffled()
         if(count < 10) {
             val phrase = getCurrentPhrase()
             runOnUiThread {
+
                 wordView.text = phrase
+                Log.i("test", "lause $phrase")
                 btnList.forEachIndexed {index, btn ->
                     if(index == buttonOrder[1]) {
                         btnList[index].text = rightAnswer
                     } else {
                         btnList[index].text = getRandomWord()
                     }
+
                     btn.isEnabled = true
                     btn.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
                     /*Only for testing on an android device
                     btn.setOnClickListener {
                         checkAnswerTest(btn.text.toString())
                     }*/
+                    btn.setOnClickListener {
+                        stopListen()
+                        checkAnswer(btn.text.toString())
+                        Log.i("test", "nappi")
+                    }
                 }
             }
+            startListen()
         } else {
             endGameDialog()
         }
@@ -182,34 +206,34 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
 
     @SuppressLint("ResourceAsColor")
-    private fun checkAnswer(text: String, qiContext: QiContext?) {
+    private fun checkAnswer(text: String) {
+        updateButtons()
         if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
             thread {
-                updateButtons()
-                val say = SayBuilder.with(qiContext)
-                    .withText("Jee oikein meni!!")
-                    .build()
-                say.async().run()
+                Log.i("test", "$rightAnswer")
                 val animation = AnimationBuilder.with(qiContext).withResources(R.raw.nice_reaction).build()
                 val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
-                animate.run()
-                startListen(qiContext)
-                Log.i("test", "oikein")
+                animate.async().run()
+                val say = SayBuilder.with(qiContext)
+                    .withText("Jee, oikein meni")
+                    .build()
+                say.run()
+                Log.i("test", "$rightAnswer")
                 rightAnswerCount++
                 count++
                 startGame()
             }
+            Log.i("test", "threadin ulkona")
         } else {
             thread {
-                updateButtons()
+                val animation = AnimationBuilder.with(qiContext).withResources(R.raw.sad_reaction).build()
+                val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+                animate.async().run()
                 val say = SayBuilder.with(qiContext)
                     .withText("Tämä meni väärin, oikea vastaus oli: $rightAnswer")
                     .build()
-                say.async().run()
-                val animation = AnimationBuilder.with(qiContext).withResources(R.raw.sad_reaction).build()
-                val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
-                animate.run()
-                startListen(qiContext)
+                say.run()
+
                 Log.i("test", "väärin")
                 count++
                 startGame()

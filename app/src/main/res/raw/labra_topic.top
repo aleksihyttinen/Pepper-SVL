@@ -1,7 +1,7 @@
 topic: ~labra_topic()
 
 #avainsanat/kysymykset
-concept:(kysymys) ["Mikä on" "Kerro minulle"]
+concept:(kysymys) ["Mikä on" Kerro "Kerro minulle"]
 concept:(yeti) [yeti yetistä tabletti tabletista]
 concept:(evondos) [evondosista evondos "lääke *"]
 concept:(somnox) [somnoxista somnox "*tyyny*" tyynystä]

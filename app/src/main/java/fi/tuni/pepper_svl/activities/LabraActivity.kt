@@ -3,6 +3,7 @@ package fi.tuni.pepper_svl.activities
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -11,6 +12,7 @@ import com.aldebaran.qi.Future
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
+import com.aldebaran.qi.sdk.builder.*
 import com.aldebaran.qi.sdk.`object`.conversation.Chat
 import com.aldebaran.qi.sdk.`object`.conversation.QiChatbot
 import com.aldebaran.qi.sdk.`object`.conversation.Topic
@@ -19,10 +21,10 @@ import com.aldebaran.qi.sdk.`object`.humanawareness.HumanAwareness
 import com.aldebaran.qi.sdk.`object`.locale.Language
 import com.aldebaran.qi.sdk.`object`.locale.Locale
 import com.aldebaran.qi.sdk.`object`.locale.Region
-import com.aldebaran.qi.sdk.builder.ChatBuilder
-import com.aldebaran.qi.sdk.builder.QiChatbotBuilder
-import com.aldebaran.qi.sdk.builder.TopicBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import com.aldebaran.qi.sdk.`object`.actuation.*
+import com.aldebaran.qi.sdk.`object`.conversation.Say
+import com.aldebaran.qi.sdk.`object`.image.EncodedImage
 import com.softbankrobotics.dx.followme.FollowHuman
 import fi.tuni.pepper_svl.adapters.CustomAdapter
 import fi.tuni.pepper_svl.models.ItemsViewModel
@@ -34,13 +36,17 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     private var qiContext: QiContext? = null
     private var followHuman: FollowHuman? = null
     private var humanAwareness: HumanAwareness? = null
+    private var localizingAndMapping: Future<Void>? = null
+    private var localizeAndMap: LocalizeAndMap? = null
+    private var localize: Localize? = null
+    private var explorationMap: ExplorationMap? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_labra)
         QiSDK.register(this, this)
         text = findViewById(R.id.text)
         val recyclerview = findViewById<RecyclerView>(R.id.recyclerview)
-        recyclerview.layoutManager = GridLayoutManager(this, 6)
+        recyclerview.layoutManager = GridLayoutManager(this, 4)
         val deviceNames = arrayOf("Yeti", "Igloo",  "evondos", "somnox", "ohmni", "mpower", "kelosound",
             "oculus", "exoskeleton", "taikaseinä", "säkkituoli")
         val data = ArrayList<ItemsViewModel>()
@@ -55,11 +61,64 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     override fun onRobotFocusGained(_qiContext: QiContext) {
         qiContext = _qiContext
         humanAwareness = qiContext?.humanAwareness
-        startChat()
         updateUi(humanAwareness?.engagedHuman != null)
         humanAwareness!!.addOnEngagedHumanChangedListener {
             updateUi(humanAwareness?.engagedHuman != null)
             stopFollowing()
+        }
+        val say: Say = SayBuilder.with(qiContext)
+            .withText("Odota hetki kun tutustun ympäristööni")
+            .build()
+        say.run()
+        // Build the action.
+        localizeAndMap = LocalizeAndMapBuilder.with(qiContext).build()
+
+// Add a listener to get the map when localized.
+        localizeAndMap?.addOnStatusChangedListener { localizationStatus ->
+            if (localizationStatus == LocalizationStatus.LOCALIZED) {
+                Log.i("test", "mapped")
+                // Stop the action.
+                explorationMap = localizeAndMap?.dumpMap()
+                localizingAndMapping?.requestCancellation()
+
+            }
+        }
+
+// Run the action.
+        localizingAndMapping = localizeAndMap?.async()?.run()
+        localizingAndMapping?.thenConsume { future ->
+            if (future.hasError()) {
+                Log.e("test", "LocalizeAndMap action finished with error.", future.error)
+            } else if (future.isCancelled) {
+                // The LocalizeAndMap action has been cancelled.
+                localize = LocalizeBuilder.with(qiContext)
+                .withMap(explorationMap)
+                    .build()
+
+                // Add an on status changed listener on the Localize action to know when the robot is localized in the map.
+                localize?.addOnStatusChangedListener { status ->
+                    if (status == LocalizationStatus.LOCALIZED) {
+                        Log.i("test", "Robot is localized.")
+                        val say: Say = SayBuilder.with(qiContext)
+                            .withText("Nyt olen valmis")
+                            .build()
+                        say.run()
+                        startChat()
+                    }
+                }
+
+                Log.i("test", "Localizing...")
+
+                // Execute the Localize action asynchronously.
+                val localization = localize?.async()?.run()
+
+                // Add a lambda to the action execution.
+                localization?.thenConsume { future ->
+                    if (future.hasError()) {
+                        Log.e("test", "Localize action finished with error.", future.error)
+                    }
+                }
+            }
         }
 
     }
@@ -68,6 +127,8 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         chat.removeAllOnStartedListeners()
         chat.removeAllOnHeardListeners()
         humanAwareness?.removeAllOnEngagedHumanChangedListeners()
+        localizeAndMap?.removeAllOnStatusChangedListeners()
+        localize?.removeAllOnStatusChangedListeners()
         qiContext = null
     }
 
@@ -79,8 +140,15 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
     private fun startFollowing() {
         val engagedHuman: Human? = humanAwareness?.engagedHuman
-        followHuman = engagedHuman?.let { FollowHuman(qiContext!!, it) }
-        followHuman?.start()
+        /*followHuman = engagedHuman?.let { FollowHuman(qiContext!!, it) }
+        followHuman?.start()*/
+        // Build the action.
+        val approachHuman = ApproachHumanBuilder.with(qiContext)
+            .withHuman(engagedHuman)
+            .build()
+
+// Run the action asynchronously.
+        approachHuman.async().run()
     }
     private fun stopFollowing() {
         followHuman?.stop()
@@ -110,7 +178,14 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         val chatFuture = chat.async().run()
         chat.addOnHeardListener { heardPhrase ->
             if(heardPhrase.text == "seuraa minua") {
-                startFollowing()
+                if(humanAwareness?.engagedHuman == null) {
+                    val say: Say = SayBuilder.with(qiContext)
+                        .withText("En näe ketään jota voisin seurata")
+                        .build()
+                    say.run()
+                } else {
+                    startFollowing()
+                }
             }
             if(heardPhrase.text == "pysähdy") {
                 stopFollowing()
