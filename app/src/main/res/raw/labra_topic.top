@@ -13,7 +13,7 @@ concept:(exoskeleton) [meditas meditaksesta exoskeletonista exoskeleton skelex]
 concept:(taikaseinä) [taikaiseinä taikaseinästä]
 concept:(säkkituoli) [säkkituoli säkkituolista]
 concept:(igloo) ["tämä huone" "*huone*" huoneesta igloo igloosta]
-
+u:(sohvat) menen sohvien luo
 #liike
 u: (seuraa minua) seuraan
 u: (pysähdy) pysähdyn
