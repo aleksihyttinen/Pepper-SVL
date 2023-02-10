@@ -1,6 +1,8 @@
 package fi.tuni.pepper_svl.activities
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -29,6 +31,7 @@ import com.softbankrobotics.dx.followme.FollowHuman
 import fi.tuni.pepper_svl.R
 import fi.tuni.pepper_svl.adapters.CustomAdapter
 import fi.tuni.pepper_svl.data.RobotHelper
+import fi.tuni.pepper_svl.data.Sananlaskut
 import fi.tuni.pepper_svl.data.SaveFileHelper
 import fi.tuni.pepper_svl.data.Vector2theta
 import fi.tuni.pepper_svl.models.ItemsViewModel
@@ -60,11 +63,11 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         text = findViewById(R.id.text)
         val recyclerview = findViewById<RecyclerView>(R.id.recyclerview)
         recyclerview.layoutManager = GridLayoutManager(this, 4)
-        val deviceNames = arrayOf("Yeti", "Igloo",  "evondos", "somnox", "ohmni", "mpower", "kelosound",
-            "oculus", "exoskeleton", "taikaseinä", "säkkituoli")
+        val deviceNames = arrayOf("Yeti", "Igloo",  "Evondos", "Somnox", "Ohmni", "Mpower", "Kelosound",
+            "Oculus", "Exoskeleton", "Taikaseinä", "Säkkituoli", "Älyseinä", "Optogait", "Pepper")
         val data = ArrayList<ItemsViewModel>()
         for (device in deviceNames) {
-            data.add(ItemsViewModel(R.drawable.test, device))
+            data.add(ItemsViewModel(this.resources.getIdentifier(device.lowercase().replace("ä", "a"), "drawable", this.packageName), device))
         }
         val adapter = CustomAdapter(data)
         recyclerview.adapter = adapter
@@ -80,73 +83,14 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
             stopFollowing()
         }
         startChat()
-        val file = File("/sdcard/Maps", "points.json")
-        Log.i("test", file.toString())
-        if (file.exists()) {
-            loadLocations()
-        }
-        /*
-        val say: Say = SayBuilder.with(qiContext)
-            .withText("Odota hetki kun tutustun ympäristööni")
-            .build()
-        say.run()
-        // Build the action.
-        localizeAndMap = LocalizeAndMapBuilder.with(qiContext).build()
-
-// Add a listener to get the map when localized.
-        localizeAndMap?.addOnStatusChangedListener { localizationStatus ->
-            if (localizationStatus == LocalizationStatus.LOCALIZED) {
-                Log.i("test", "mapped")
-                // Stop the action.
-                explorationMap = localizeAndMap?.dumpMap()
-                localizingAndMapping?.requestCancellation()
-
-            }
-        }
-
-// Run the action.
-        localizingAndMapping = localizeAndMap?.async()?.run()
-        localizingAndMapping?.thenConsume { future ->
-            if (future.hasError()) {
-                Log.e("test", "LocalizeAndMap action finished with error.", future.error)
-            } else if (future.isCancelled) {
-                // The LocalizeAndMap action has been cancelled.
-                localize = LocalizeBuilder.with(qiContext)
-                .withMap(explorationMap)
-                    .build()
-
-                // Add an on status changed listener on the Localize action to know when the robot is localized in the map.
-                localize?.addOnStatusChangedListener { status ->
-                    if (status == LocalizationStatus.LOCALIZED) {
-                        Log.i("test", "Robot is localized.")
-                        val say: Say = SayBuilder.with(qiContext)
-                            .withText("Nyt olen valmis")
-                            .build()
-                        say.run()
-                        startChat()
-                    }
-                }
-
-                Log.i("test", "Localizing...")
-
-                // Execute the Localize action asynchronously.
-                val localization = localize?.async()?.run()
-
-                // Add a lambda to the action execution.
-                localization?.thenConsume { future ->
-                    if (future.hasError()) {
-                        Log.e("test", "Localize action finished with error.", future.error)
-                    }
-                }
-            }
-        }*/
+        loadLocations()
 
     }
-    fun loadLocations(): Future<Boolean>? {
+    private fun loadLocations(): Future<Boolean>? {
         Log.i("test", "load started")
         return FutureUtils.futureOf<Boolean> { f: Future<Void?>? ->
             // Read file into a temporary hashmap.
-            val file: File = File(filesDirectoryPath, locationsFileName)
+            val file = File(filesDirectoryPath, locationsFileName)
             if (file.exists()) {
                 val vectors: Map<String, Vector2theta> =
                     saveFileHelper!!.getLocationsFromFile(filesDirectoryPath, locationsFileName)
@@ -283,6 +227,13 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
             if (future.hasError()) {
                 Log.e("Error", "Discussion finished with error.", future.error)
             }
+        }
+    }
+    fun itemDialog(item: String) {
+        runOnUiThread {
+            val alertDialog = AlertDialog.Builder(this)
+            alertDialog.setTitle(item)
+            alertDialog.show()
         }
     }
 }

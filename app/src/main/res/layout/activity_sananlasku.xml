@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="40sp"
-        android:text="Tänne tulee sananlasku-peli"
+        android:text="Ladataan..."
         android:textColor="@color/black"/>
 
     <androidx.appcompat.widget.AppCompatButton
@@ -20,19 +20,19 @@
         android:layout_width="500dp"
         android:layout_height="100dp"
         android:textSize="50dp"
-        android:text="Vastaus1" />
+        android:text="" />
     <androidx.appcompat.widget.AppCompatButton
         android:layout_marginTop="20dp"
         android:id="@+id/answer2"
         android:layout_width="500dp"
         android:layout_height="100dp"
         android:textSize="50dp"
-        android:text="Vastaus2" />
+        android:text="" />
     <androidx.appcompat.widget.AppCompatButton
         android:layout_marginTop="20dp"
         android:id="@+id/answer3"
         android:layout_width="500dp"
         android:layout_height="100dp"
         android:textSize="50dp"
-        android:text="Vastaus3" />
+        android:text="" />
 </LinearLayout>

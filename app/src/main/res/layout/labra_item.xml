@@ -4,11 +4,14 @@
     android:layout_height="200dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:layout_margin="10dp">
-    <ImageView
-        android:id="@+id/image"
+    android:layout_margin="10dp"
+    android:background="@color/white">
+    <ImageButton
+        android:id="@+id/image_btn"
         android:layout_width="150dp"
-        android:layout_height="150dp"/>
+        android:layout_height="150dp"
+        android:background="@color/white"
+        android:clickable="true"/>
     <TextView
         android:id="@+id/name"
         android:layout_width="150dp"
