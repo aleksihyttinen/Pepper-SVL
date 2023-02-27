@@ -32,6 +32,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     private lateinit var wordView: TextView
     private var btnList = mutableListOf<Button>()
     private var listenFuture: Future<ListenResult>? = null
+    private lateinit var menuButton: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sananlasku)
@@ -40,6 +41,11 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         btnList.add(findViewById(R.id.answer1))
         btnList.add(findViewById(R.id.answer2))
         btnList.add(findViewById(R.id.answer3))
+        menuButton = findViewById(R.id.menu)
+        menuButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onRobotFocusGained(_qiContext: QiContext?) {
@@ -50,7 +56,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         animate.async().run()
         val say: Say = SayBuilder.with(qiContext)
             .withText("Nyt voit pelata kanssani sananlaskupeliä. Voit sanoa minulle" +
-                    "puuttuvan sanan tai painaa näytöllä näkyvistä vaihtoehdoista.")
+                    "puuttuvan sanan tai painaa näytöllä näkyvistä vaihtoehdoista. Näytän sinulle 10 sananlaskua ja lopuksi kerron montako meni oikein.")
             .build()
         say.run()
         startGame()
@@ -69,7 +75,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     private fun startListen() {
         thread {
             val phraseSet = PhraseSetBuilder.with(qiContext)
-                .withTexts(*Sananlaskut().getWords())
+                .withTexts(*Sananlaskut().getWords(), "uusi peli", "takaisin päävalikkoon")
                 .build()
             val listen: Listen = ListenBuilder.with(qiContext)
                 .withPhraseSet(phraseSet)
@@ -78,7 +84,17 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             listenFuture?.thenConsume { future ->
                 if (future.isSuccess) {
                     Log.i("test", listenFuture?.get()?.heardPhrase!!.text)
-                    checkAnswer(listenFuture?.get()?.heardPhrase!!.text)
+                    var text = listenFuture?.get()?.heardPhrase!!.text
+                    if (text.lowercase() == "takaisin päävalikkoon") {
+                        runOnUiThread {menuButton.performClick()}
+                    } else if (text.lowercase() == "uusi peli") {
+                        count = 1
+                        rightAnswerCount = 0
+                        sananlaskut = Sananlaskut().getSananlaskut()
+                        startGame()
+                    } else {
+                        checkAnswer(text)
+                    }
                 } else if (future.hasError()) {
                     Log.e("test", "Error", future.error)
                 }
@@ -183,6 +199,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     }*/
 
     private fun endGameDialog() {
+        startListen()
         runOnUiThread {
             val alertDialog = AlertDialog.Builder(this)
             alertDialog.setTitle("Peli loppui")
@@ -203,8 +220,15 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
 
             alertDialog.show()
         }
+        thread {
+            val say = SayBuilder.with(qiContext)
+                .withText("Peli loppui, sait $rightAnswerCount oikein")
+                .build()
+            say.run()
+        }
     }
-
+    val goodPhrases = arrayOf("Jee oikein meni", "Hienoa tämä meni oikein", "Mahtavaa tämä oli oikein")
+    val badPhrases = arrayOf("Höh tämä meni väärin", "Tämä ei mennyt oikein", "Ensi kerralla paremmin")
     @SuppressLint("ResourceAsColor")
     private fun checkAnswer(text: String) {
         updateButtons()
@@ -215,7 +239,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                 val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
                 animate.async().run()
                 val say = SayBuilder.with(qiContext)
-                    .withText("Jee, oikein meni")
+                    .withText(goodPhrases.random())
                     .build()
                 say.run()
                 Log.i("test", "$rightAnswer")
@@ -230,7 +254,7 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                 val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
                 animate.async().run()
                 val say = SayBuilder.with(qiContext)
-                    .withText("Tämä meni väärin, oikea vastaus oli: $rightAnswer")
+                    .withText(badPhrases.random() + "Oikea vastaus oli: $rightAnswer")
                     .build()
                 say.run()
 

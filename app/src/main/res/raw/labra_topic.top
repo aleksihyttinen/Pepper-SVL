@@ -13,11 +13,17 @@ concept:(exoskeleton) [meditas meditaksesta exoskeletonista exoskeleton skelex]
 concept:(taikaseinä) [taikaiseinä taikaseinästä]
 concept:(säkkituoli) [säkkituoli säkkituolista]
 concept:(igloo) ["tämä huone" "*huone*" huoneesta igloo igloosta]
-u:(sohvat) menen sohvien luo
+concept:(pepper) ["pepper*" pepperistä pepper itsestäsi sinusta]
+concept:(älyseinä) [älyseinä älyseinästä]
+concept:(optogait) [optogait optogaitista]
+#u:(sohvat) menen sohvien luo
 #liike
-u: (seuraa minua) seuraan
+u: (["tule tänne" "Pepper tule tänne" "Tule tänne Pepper"]) tulen
 u: (pysähdy) pysähdyn
+u:("lopeta kuuntelu") "lopetan kuuntelun" ^endDiscuss("Kuuntelu lopetettu")
+u: ("takaisin päävalikkoon") ""
 #laitteet
+u: (~kysymys ~pepper) "Hei, olen Pepper-robotti. Olen SoftBank-roboticsin kehittämä puolihumanoidi robotti. Pystyn esimerkiksi liikkumaan, keskustelemaan ja lukemaan tunteita kasvoista"
 u: (~kysymys ~yeti) "Tämä on Yeti-jättitabletti, joka on maailman ensimmäinen jättikokoinen Android-tabletti. Yeti-jättitabletti tuo koko digitaalisen maailman erilaisten käyttäjäryhmien ulottuville,
                                                                     ja tabletin monipuolisuus ja iso koko mahdollistavat sen monipuolisen käytön erilaisissa ympäristöissä."
 u: (~kysymys ~evondos) "Evondos lääkeannostelurobotti, joka ohjaa kotihoidon asiakkaan ottamaan aina oikean lääkkeen oikeana annoksena ja oikeaan aikaan.  Palvelu käyttää apteekin tarjoamaa koneellista annosjakelua. Robotti lukee annospussin tekstikentistä lääkkeen antamisajankohdan ja toimii sen mukaisesti."
@@ -30,3 +36,5 @@ u: (~kysymys ~exoskeleton) "Skelex exoskeleton tukee käyttäjän käsiä ja aut
 u: (~kysymys ~taikaseinä) "Magic Mirror -Taikaseinä auttaa kehittämään vuorovaikutus- ja kommunikaatiotaitoja luovan ja moniaistisen pelaamisen keinoin. Peli toimii esimerkiksi katseen, puheen, kosketuksen ja ohjaimien avulla ja samaan aikaan voi pelata yhdestä kuuteen henkilöä"
 u: (~kysymys ~säkkituoli) "Haltijan vibroakustinen säkkituoli on osa SHX aistihuoneita. Säkkituoli tärisee huoneen äänen mukaan, jolla on rauhoittava vaikutus."
 u: (~kysymys ~igloo) "Igloon immersiivinen huone on kuin VR lasit huoneeksi muutettuna. Toisin kuin laseilla, kokemukseen pääsee mukaan useampi käyttäjä."
+u: (~kysymys ~älyseinä) "Älyseinällä sinulla on mahdollisuus olla vuorovaikutuksessa Suomen luonnon kanssa luomalla erilaisia animaatioita. Voit maalata seinälle talvella revontulet ja syksyllä lentävät syksyn lehdet. Visuaalisten tehosteiden lisäksi pääset nauttimaan Suomen luonnon aidoista äänimaisemista."
+u: (~kysymys ~optogait) "Optogait on huippuluokan askel analyysijärjestelmä, joka tuo todistetun arviointifilosofian vammojen ehkäisyyn ja kuntoutukseen."

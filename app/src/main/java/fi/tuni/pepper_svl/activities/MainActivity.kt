@@ -52,9 +52,7 @@ class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
             animate.run()
         }
     }
-
     override fun onRobotFocusLost() {
-
     }
 
     override fun onRobotFocusRefused(reason: String?) {
