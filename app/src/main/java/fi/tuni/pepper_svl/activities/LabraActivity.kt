@@ -87,14 +87,20 @@ class LabraActivity : RobotActivity(), RobotLifecycleCallbacks {
         QiSDK.unregister(this, this)
     }
     private fun startFollowing() {
-        val engagedHuman: Human? = humanAwareness?.engagedHuman
-        // Build the action.
-        val approachHuman = ApproachHumanBuilder.with(qiContext)
-            .withHuman(engagedHuman)
-            .build()
-
-// Run the action asynchronously.
-        approachHuman.async().run()
+        if (qiContext?.power?.chargingFlap?.state?.open == true) {
+            cancelChat()
+            val say: Say = SayBuilder.with(qiContext)
+                .withText("Latausporttini on auki, en voi liikkua ennen kuin suljet sen.")
+                .build()
+            say.run()
+            startChat()
+        } else {
+            val engagedHuman: Human? = humanAwareness?.engagedHuman
+            val approachHuman = ApproachHumanBuilder.with(qiContext)
+                .withHuman(engagedHuman)
+                .build()
+            approachHuman.async().run()
+        }
     }
     private fun updateUi(humanFound: Boolean) {
         runOnUiThread {

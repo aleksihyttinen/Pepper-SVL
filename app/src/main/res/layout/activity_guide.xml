@@ -1,9 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activities.GuideActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/menu"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Takaisin päävalikkoon"
+        />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Labran esittely:"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:layout_marginTop="10dp"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='Tässä näkymässä voit kysyä Pepperiltä labran eri laitteista. \nVoit esimerkiksi kysyä: "Kerro minulle Yetistä".'/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='Pepper voi siirtyä luoksesi sanomalla sille "Tule tänne Pepper"\nkun näytöllä lukee "valmiina liikkumaan".'/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Laitteen kuvaa painamalla voit avata laitevalmistajan kotisivut."/>
+            <TextView
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:text="Ääniohjauksen esimerkkikomentoja:"/>
+            <TextView
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='"Tule tänne Pepper"\n"Kerro itsestäsi"\n"Kerro minulle/Mikä on (laitteen nimi)"\n"Lopeta kuuntelu"\n"Takaisin päävalikkoon"'/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sananlaskupeli:"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:layout_marginTop="50dp"
+                />
+            <TextView
+                android:layout_marginTop="10dp"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='Tässä näkymässä voit pelata sananlaskupeliä Pepperin kanssa.\nPelissä voit valita oikean sanan täydentämään sananlaskua joko\npainamalla sanaa näytötä tai sanomalla sen ääneen.'/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='Pelissä on 10 kysymystä ja pelin lopuksi Pepper kertoo montako vastausta\nmeni oikein. Voit lopettaa pelin milloin vain painamalla lopeta peli-nappia\ntai sanomalla Pepperille "Lopeta peli".'/>
+            <TextView
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:text="Ääniohjauksen esimerkkikomentoja:"/>
+            <TextView
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text='"(Vastausvaihtoehto)"\n"Lopeta peli"\n"Takaisin päävalikkoon"\n"Lopeta kuuntelu"'/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

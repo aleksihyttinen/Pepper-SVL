@@ -18,21 +18,24 @@ import com.aldebaran.qi.sdk.`object`.conversation.ListenResult
 import com.aldebaran.qi.sdk.`object`.conversation.Say
 import com.aldebaran.qi.sdk.builder.*
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import com.aldebaran.qi.sdk.`object`.conversation.BodyLanguageOption
 import fi.tuni.pepper_svl.R
 import fi.tuni.pepper_svl.data.Sananlaskut
 import kotlin.concurrent.thread
 
 
 class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
+    private var alertDialog: AlertDialog? = null
     private var sananlaskut = Sananlaskut().getSananlaskut()
     private var rightAnswer = ""
-    private var count = 0
+    private var count = 1
     private var qiContext : QiContext? = null
     private var rightAnswerCount = 0
     private lateinit var wordView: TextView
     private var btnList = mutableListOf<Button>()
     private var listenFuture: Future<ListenResult>? = null
     private lateinit var menuButton: Button
+    private lateinit var endGameButton: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sananlasku)
@@ -46,11 +49,15 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
+        endGameButton = findViewById(R.id.end_game)
+        endGameButton.setOnClickListener {
+            stopListen()
+            endGameDialog()
+        }
     }
 
     override fun onRobotFocusGained(_qiContext: QiContext?) {
         qiContext = _qiContext
-        Log.i("test", "focus")
         val animation = AnimationBuilder.with(qiContext).withResources(R.raw.show_tablet).build()
         val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
         animate.async().run()
@@ -59,6 +66,9 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                     "puuttuvan sanan tai painaa näytöllä näkyvistä vaihtoehdoista. Näytän sinulle 10 sananlaskua ja lopuksi kerron montako meni oikein.")
             .build()
         say.run()
+        runOnUiThread{
+            endGameButton.isEnabled = true
+        }
         startGame()
     }
 
@@ -75,23 +85,33 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     private fun startListen() {
         thread {
             val phraseSet = PhraseSetBuilder.with(qiContext)
-                .withTexts(*Sananlaskut().getWords(), "uusi peli", "takaisin päävalikkoon")
+                .withTexts(*Sananlaskut().getWords(), "uusi peli", "takaisin päävalikkoon", "lopeta peli", "lopeta kuuntelu")
                 .build()
             val listen: Listen = ListenBuilder.with(qiContext)
+                .withBodyLanguageOption(BodyLanguageOption.DISABLED)
                 .withPhraseSet(phraseSet)
                 .build()
             listenFuture = listen.async().run()
             listenFuture?.thenConsume { future ->
                 if (future.isSuccess) {
-                    Log.i("test", listenFuture?.get()?.heardPhrase!!.text)
-                    var text = listenFuture?.get()?.heardPhrase!!.text
+                    val text = listenFuture?.get()?.heardPhrase!!.text
                     if (text.lowercase() == "takaisin päävalikkoon") {
-                        runOnUiThread {menuButton.performClick()}
+                        runOnUiThread {
+                            alertDialog!!.dismiss()
+                            menuButton.performClick()
+                        }
+                    } else if (text.lowercase() == "lopeta kuuntelu") {
+                        stopListen()
                     } else if (text.lowercase() == "uusi peli") {
+                        runOnUiThread {
+                            alertDialog!!.dismiss()
+                        }
                         count = 1
                         rightAnswerCount = 0
                         sananlaskut = Sananlaskut().getSananlaskut()
                         startGame()
+                    } else if (text.lowercase() == "lopeta peli")  {
+                        endGameDialog()
                     } else {
                         checkAnswer(text)
                     }
@@ -115,7 +135,6 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     private fun getCurrentPhrase(): String {
         val sentence = sananlaskut.random()
         sananlaskut.remove(sentence)
-        Log.i("test", sananlaskut.indices.toString())
         val wordArray = sentence.split(" ").toTypedArray()
         val index = wordArray.indices.random()
         var word = wordArray[index]
@@ -126,31 +145,24 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
     }
 
     private fun startGame() {
-        Log.i("test", "peli alkaa")
-        val buttonOrder = (0..2).shuffled()
-        if(count < 10) {
+        val buttonOrder = (0..2).shuffled() //Randomize numbers 0, 1 and 2 and add them to a list
+        if(count < 11) {
             val phrase = getCurrentPhrase()
             runOnUiThread {
 
                 wordView.text = phrase
-                Log.i("test", "lause $phrase")
                 btnList.forEachIndexed {index, btn ->
                     if(index == buttonOrder[1]) {
-                        btnList[index].text = rightAnswer
+                        btnList[index].text = rightAnswer //Set correct answer to the index which matches second item in buttonOrder
                     } else {
-                        btnList[index].text = getRandomWord()
+                        btnList[index].text = getRandomWord() //Set random words on others
                     }
 
                     btn.isEnabled = true
                     btn.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
-                    /*Only for testing on an android device
-                    btn.setOnClickListener {
-                        checkAnswerTest(btn.text.toString())
-                    }*/
                     btn.setOnClickListener {
                         stopListen()
                         checkAnswer(btn.text.toString())
-                        Log.i("test", "nappi")
                     }
                 }
             }
@@ -173,58 +185,34 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         }
     }
 
-    /* Only for testing on an android device when Pepper is unavailable
-    fun checkAnswerTest(text: String) {
-        @SuppressLint("ResourceAsColor")
-            if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
-                thread {
-                    Log.i("test", "oikein")
-                    updateButtons()
-                    rightAnswerCount++
-                    count++
-                    Timer().schedule(timerTask {
-                        startGame()
-                    }, 2000)
-                }
-            } else {
-                thread {
-                    Log.i("test", "väärin")
-                    updateButtons()
-                    count++
-                    Timer().schedule(timerTask {
-                        startGame()
-                    }, 2000)
-                }
-            }
-    }*/
-
     private fun endGameDialog() {
-        startListen()
         runOnUiThread {
-            val alertDialog = AlertDialog.Builder(this)
-            alertDialog.setTitle("Peli loppui")
-            alertDialog.setMessage("Sait $rightAnswerCount/10 oikein!\nHaluatko pelata uudelleen?")
-            alertDialog.setCancelable(false)
-            alertDialog.setPositiveButton("Uusi peli") { dialog, whichButton ->
+            val dialogBuilder = AlertDialog.Builder(this)
+            dialogBuilder.setTitle("Peli loppui")
+            dialogBuilder.setMessage("Sait $rightAnswerCount/${count -1} oikein!\nHaluatko pelata uudelleen?")
+            dialogBuilder.setCancelable(false)
+            dialogBuilder.setPositiveButton("Uusi peli") { dialog, whichButton ->
                 count = 1
                 rightAnswerCount = 0
                 sananlaskut = Sananlaskut().getSananlaskut()
                 startGame()
             }
-            alertDialog.setNegativeButton(
-                "Palaa valikkoon",
+            dialogBuilder.setNegativeButton(
+                "Takaisin päävalikkoon",
             ) { dialog, whichButton ->
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }
+            alertDialog = dialogBuilder.create()
+            alertDialog!!.show()
 
-            alertDialog.show()
         }
         thread {
             val say = SayBuilder.with(qiContext)
-                .withText("Peli loppui, sait $rightAnswerCount oikein")
+                .withText("Peli loppui, sait $rightAnswerCount oikein.")
                 .build()
             say.run()
+            startListen()
         }
     }
     val goodPhrases = arrayOf("Jee oikein meni", "Hienoa tämä meni oikein", "Mahtavaa tämä oli oikein")
@@ -234,7 +222,6 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
         updateButtons()
         if (text.lowercase().trim() == rightAnswer.lowercase().trim()) {
             thread {
-                Log.i("test", "$rightAnswer")
                 val animation = AnimationBuilder.with(qiContext).withResources(R.raw.nice_reaction).build()
                 val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
                 animate.async().run()
@@ -242,12 +229,10 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                     .withText(goodPhrases.random())
                     .build()
                 say.run()
-                Log.i("test", "$rightAnswer")
                 rightAnswerCount++
                 count++
                 startGame()
             }
-            Log.i("test", "threadin ulkona")
         } else {
             thread {
                 val animation = AnimationBuilder.with(qiContext).withResources(R.raw.sad_reaction).build()
@@ -257,8 +242,6 @@ class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
                     .withText(badPhrases.random() + "Oikea vastaus oli: $rightAnswer")
                     .build()
                 say.run()
-
-                Log.i("test", "väärin")
                 count++
                 startGame()
             }

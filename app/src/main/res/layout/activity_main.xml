@@ -25,5 +25,12 @@
             android:layout_height="80dp"
             android:text="Sananlasku-peli"
             android:textSize="30sp" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/guide_button"
+            android:layout_marginTop="30dp"
+            android:layout_width="400dp"
+            android:layout_height="80dp"
+            android:text="Ohjeet"
+            android:textSize="30sp" />
     </LinearLayout>
 </LinearLayout>
