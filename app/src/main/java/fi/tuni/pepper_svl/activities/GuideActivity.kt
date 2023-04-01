@@ -1,15 +1,24 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import fi.tuni.pepper_svl.R
 
-class SananlaskuActivity : RobotActivity(), RobotLifecycleCallbacks {
+class GuideActivity : RobotActivity(), RobotLifecycleCallbacks {
+    private lateinit var menuButton: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sananlasku)
+        setContentView(R.layout.activity_guide)
+        menuButton = findViewById(R.id.menu)
+        menuButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onRobotFocusGained(qiContext: QiContext?) {

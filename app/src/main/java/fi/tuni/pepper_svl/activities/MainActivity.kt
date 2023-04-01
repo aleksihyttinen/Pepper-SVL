@@ -1,15 +1,17 @@
-package fi.tuni.pepper_svl
+package fi.tuni.pepper_svl.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import com.aldebaran.qi.sdk.QiContext
 import com.aldebaran.qi.sdk.QiSDK
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks
 import com.aldebaran.qi.sdk.`object`.conversation.Say
+import com.aldebaran.qi.sdk.builder.AnimateBuilder
+import com.aldebaran.qi.sdk.builder.AnimationBuilder
 import com.aldebaran.qi.sdk.builder.SayBuilder
 import com.aldebaran.qi.sdk.design.activity.RobotActivity
+import fi.tuni.pepper_svl.R
 
 class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,11 @@ class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
             val intent = Intent(this, LabraActivity::class.java)
             startActivity(intent)
         }
+        val guideButton : Button = findViewById(R.id.guide_button)
+        guideButton.setOnClickListener {
+            val intent = Intent(this, GuideActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onDestroy() {
@@ -35,13 +42,14 @@ class MainActivity : RobotActivity(), RobotLifecycleCallbacks {
 
     override fun onRobotFocusGained(qiContext: QiContext?) {
         val say: Say = SayBuilder.with(qiContext)
-            .withText("Hei ihminen!")
+            .withText("Hei ihminen, minä olen Pepper")
             .build()
-        say.run()
+        say.async().run()
+        val animation = AnimationBuilder.with(qiContext).withResources(R.raw.wave).build()
+        val animate = AnimateBuilder.with(qiContext).withAnimation(animation).build()
+        animate.run()
     }
-
     override fun onRobotFocusLost() {
-
     }
 
     override fun onRobotFocusRefused(reason: String?) {
